@@ -15,11 +15,10 @@ app.use(express.json());
 //   res.status(200).json({ message: "server is active" });
 // });
 
-
-
 app.use("/api/account", userRegisteration);
 app.use("/api/account", bankAccount);
 app.use("/api/transfer", transferRoute);
+app.use("/api/health", require("./routes/health"));
 
 const PORT = process.env.PORT || 5000;
 
