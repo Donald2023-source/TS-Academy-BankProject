@@ -2,6 +2,8 @@ const Transaction = require("../models/Transaction");
 const Account = require("../models/account");
 const api = require("../utils/axiosInstance");
 const jwt = require("jsonwebtoken");
+
+const { getBalanceService } = require("../services/getBalanceService");
 exports.sendMoney = async (req, res) => {
   try {
     const { amount, recipientAccountNumber, senderAccountNumber } = req.body;
@@ -17,6 +19,14 @@ exports.sendMoney = async (req, res) => {
       accountNumber: senderAccountNumber,
     });
     console.log(senderAccount);
+    const senderBalance = await getBalanceService(senderAccount?.accountNumber);
+    senderAccount.balance = senderBalance;
+    await senderAccount.save();
+    receiverAccount.balance = senderBalance;
+    await recieverAccount.save();
+    if (senderBalance < amount) {
+      return res.status(400).json({ message: "Insufficient funds" });
+    }
 
     if (!senderAccount) {
       return res.status(404).json({ message: "Sender account not found" });
@@ -44,11 +54,14 @@ exports.sendMoney = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Money sent successfully",
-      data: data?.data,
+      data: data,
     });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Error sending money" });
+    console.log(err?.response?.data?.message);
+    return res.status(500).json({
+      err: err?.response?.data?.message,
+      message: "Error sending money",
+    });
   }
 };
 

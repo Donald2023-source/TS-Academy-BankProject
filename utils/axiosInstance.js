@@ -7,8 +7,13 @@ const api = axios.create({
   baseURL: "https://nibssbyphoenix.onrender.com",
 });
 
+let token;
+
 const setToken = async () => {
-  const token = await getToken();
+  token = await getToken();
+  if (token === "undefined" || !token?.token) {
+    token = await getToken();
+  }
   api.defaults.headers.Authorization = `Bearer ${token?.token}`;
   console.log("Token set successfully:", token?.token);
 };

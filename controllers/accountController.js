@@ -6,8 +6,10 @@ const {
   createBankAccount,
   createBankAccountNIBBS,
   accountDetails,
+  getBalanceService
 } = require("../services/createAccount");
 const jwt = require("jsonwebtoken");
+const api = require("../utils/axiosInstance");
 
 async function createAccount(req, res) {
   try {
@@ -119,6 +121,17 @@ async function getAccountDetails(req, res) {
   }
 }
 
+async function getBalance(req, res){
+  try {
+    const { accountNumber } = req.params;
+    const data = await getBalanceService(accountNumber);
+    return res.status(200).json({ balance: data });
+  } catch(err) {
+     console.log(err);
+    return res.status(500).json({ message: "Error fetching account details" });
+  }
+}
+
 async function Login(req, res) {
   try {
     const { email, password } = req.body;
@@ -128,7 +141,7 @@ async function Login(req, res) {
         message: "Email and password are required",
       });
     }
- 
+
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -137,7 +150,7 @@ async function Login(req, res) {
         message: "Invalid email or password",
       });
     }
-   
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -153,10 +166,9 @@ async function Login(req, res) {
         email: user.email,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
-  
     const { password: _, ...userWithoutPassword } = user.toObject();
 
     res.status(200).json({
@@ -174,10 +186,12 @@ async function Login(req, res) {
     });
   }
 }
+
 module.exports = {
   createAccount,
   addBVN,
   initializeAccount,
   getAccountDetails,
-  Login
+  Login,
+  getBalance,
 };

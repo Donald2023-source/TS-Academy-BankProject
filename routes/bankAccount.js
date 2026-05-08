@@ -8,5 +8,6 @@ router.get(
   "/details/:accountNumber",
   accountController.getAccountDetails,
 );
+router.get("/balance/:accountNumber", protect, accountController.getBalance);
 
 module.exports = router;
