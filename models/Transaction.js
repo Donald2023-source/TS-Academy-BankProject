@@ -1,7 +1,33 @@
 const { Schema, default: mongoose } = require("mongoose");
-const Transaction = new Schema({
-  ref: { type: String, unique: true },
-}, {timestamps=true});
+const Transaction = new Schema(
+  {
+    amount: {
+      type: Number,
+      required: true,
+    },
+    initiatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    senderAccount: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Account",
+      },
+    ],
+    receiverAccount: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Account",
+      },
+    ],
+    status: {
+      type: String,
+      enum: ["pending", "completed", "failed"],
+      default: "pending",
+    },
+  },
+  { timestamps: true },
+);
 
-const Transaction = mongoose.model("Transaction", Transaction);
-module.exports = Transaction;
+module.exports = mongoose.model("Transaction", Transaction);
